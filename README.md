@@ -1,4 +1,4 @@
-# TC19_TableauSalesOps
+# TC19 Optimal Territory Planning with Tableau #TableauSalesOps
 Presentation files and notes from TC19 'Optimal Territory Planning with Tableau'
 
 Link to Justin's Tableau Public dashboard

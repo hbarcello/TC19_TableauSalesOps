@@ -9,13 +9,13 @@ import pandas as pd
 from sklearn.cluster import KMeans
 
 
-def cluster_generator(input_tab_df, cluster_factor=0.08, debug=False, round=0):
+def cluster_generator(input_tab_df, cluster_factor=12, debug=False, round=0):
     target_mean = (input_tab_df['Index'].sum()) / (input_tab_df['Territories'].max())
     if debug:
         print("Target Territory Index is ", "{:.2f}".format(target_mean))
         print(type(target_mean))
         print(input_tab_df.info())
-    df_to_cluster = input_tab_df[input_tab_df['Index'] <= (target_mean * 0.70)]
+    df_to_cluster = input_tab_df[input_tab_df['Index'] <= (target_mean * 0.65)]
     if debug:
         print("Initial Cluster Filtering Completed...")
         print(df_to_cluster.head())
@@ -26,7 +26,8 @@ def cluster_generator(input_tab_df, cluster_factor=0.08, debug=False, round=0):
         if debug: print("Now Clustering", state)
         current_subset = df_to_cluster[df_to_cluster['State'] == state].copy()
         # Ensure at least 2 clusters per state, more if applicable
-        estimated_number_clusters = max(int(current_subset.Index.sum() / target_mean), 2)
+        numeric_cluster_recommendation = int(current_subset.Index.sum() / target_mean) * cluster_factor
+        estimated_number_clusters = max(numeric_cluster_recommendation, 2)
         if debug: print(estimated_number_clusters, "Estimated Clusters for", state)
         kmeans = KMeans(n_clusters=estimated_number_clusters)
         state_clusters = kmeans.fit_predict(current_subset[['Latitude', 'Longitude']])
@@ -50,7 +51,7 @@ def cluster_generator(input_tab_df, cluster_factor=0.08, debug=False, round=0):
 
 
 def cluster_writer(clustered_df_to_write, output_file_loc):
-    clustered_df_to_write.to_excel(output_file_loc, sheet_name="main", index_label=False)
+    clustered_df_to_write.to_excel(output_file_loc, sheet_name="main", index_label=False, index=False)
 
 
 def cluster_input(input_file_loc):
@@ -62,4 +63,4 @@ if __name__ == "__main__":
     input_file = "./test/example_input_cluster.csv"
     output_file = "./test/example_outputs.xlsx"
     input_data_frame = cluster_input(input_file)
-    cluster_writer(cluster_generator(input_data_frame, cluster_factor=0.05, debug=True), output_file)
+    cluster_writer(cluster_generator(input_data_frame, cluster_factor=12, debug=True), output_file)

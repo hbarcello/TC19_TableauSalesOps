@@ -1,7 +1,6 @@
 import argparse
 import cluster_engine
 
-
 parser = argparse.ArgumentParser(description="Employee Acct Routing")
 parser.add_argument("--ClusterInputFile", type=str, help="Location of input file")
 parser.add_argument("--outputLocation", type=str, help="Location of output file")

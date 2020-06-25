@@ -31,10 +31,14 @@ def cluster_generator(input_tab_df, cluster_factor=12, debug=False, round=0):
                                              numeric_cluster_maximum)
         estimated_number_clusters = max(numeric_cluster_recommendation, 2)
         if debug: print(estimated_number_clusters, "Estimated Clusters for", state)
-        kmeans = KMeans(n_clusters=estimated_number_clusters)
-        state_clusters = kmeans.fit_predict(current_subset[['Latitude', 'Longitude']])
-        if debug: print(state_clusters)
-        current_subset['ClusterName'] = [state + "." + str(round) + "." + str(c+1) for c in state_clusters]
+        # Only cluster if there is more than one postal code in the group (data quality guard)
+        if current_subset['Postal'].count() > 1:
+            kmeans = KMeans(n_clusters=estimated_number_clusters)
+            state_clusters = kmeans.fit_predict(current_subset[['Latitude', 'Longitude']])
+            if debug: print(state_clusters)
+            current_subset['ClusterName'] = [state + "." + str(round) + "." + str(c+1) for c in state_clusters]
+        else:
+            current_subset['ClusterName'] = state + "." + str(round) + "." + current_subset['Postal']
         clusters_to_breakup = current_subset.groupby('ClusterName').sum()
         clusters_to_breakup = clusters_to_breakup[clusters_to_breakup['Index'] >= target_mean]
         if len(clusters_to_breakup) > 0:
@@ -62,7 +66,7 @@ def cluster_input(input_file_loc):
 
 
 if __name__ == "__main__":
-    input_file = "./test/example_input_cluster.csv"
+    input_file = "./test/example_input.csv"
     output_file = "./test/example_outputs.xlsx"
     input_data_frame = cluster_input(input_file)
     cluster_writer(cluster_generator(input_data_frame, cluster_factor=12, debug=True), output_file)

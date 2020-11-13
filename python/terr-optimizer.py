@@ -1,33 +1,99 @@
 import cluster_engine as ce
 import pandas as pd
 from sklearn.cluster import KMeans
+import geopandas as gpd
+import itertools
+import numpy as np
+from scipy.spatial import cKDTree
+from operator import itemgetter
+from statistics import variance
+import random
 
+debug=False
 
-def cluster_allocator(user_input_df, n_territories=10, n_iterations=500, decay_rate=0.05):
+def cluster_allocator(user_input_df, n_territories=9, n_iterations=500, decay_rate=.5):
     # Field Maps from cluster_engine
     # ClusterName | Index | Latitude | Longitude
-    allocation_frame = user_input_df.groupby('ClusterName').agg({'Index': ['sum'], 'Latitude': ['mean'],
-                                                                 'Longitude': ['mean']}).reset_index()
+    allocation_frame = user_input_df.groupby('ClusterName').agg({'Index': 'sum', 'Latitude': 'mean',
+                                                                 'Longitude': 'mean'}).reset_index()
+
     print(allocation_frame)
+    # settings for annealing
+    initial_temp = 1000
+    final_temp = 1
+    current_temp = initial_temp
     km = KMeans(n_clusters=n_territories)
     territory_seed = km.fit_predict(allocation_frame[['Latitude', 'Longitude']])
     allocation_frame['Territory'] = territory_seed
-    print(allocation_frame)
     territory_target = allocation_frame.Index.sum() / n_territories
-    balance_calculator(target=territory_target, territory_data_frame=allocation_frame)
-    return allocation_frame
+    best_sse = balance_calculator(target=territory_target, territory_data_frame=allocation_frame)
+    print(f"Seeding SSE is {best_sse}")
+    print(f"Beginning Annealing...")
+    while current_temp > final_temp:
+        config_to_eval = swap_neighbors(allocation_frame, get_neighbors(allocation_frame))
+        # print(current_temp, " Current Temperature")
+        # print(balance_calculator(territory_target, config_to_eval))
+        incumbent_sse = balance_calculator(territory_target, config_to_eval)
+        if incumbent_sse <= best_sse:
+            best_sse = incumbent_sse
+            print(f"New Optimum, new best SSE is {best_sse}")
+            allocation_frame = config_to_eval
+        current_temp -= decay_rate
+        if current_temp % 50 == 0: print(current_temp, "iterations left")
+    # TODO Drop Index from allocation_frame before joining
+    # TODO  Drop Territories from user_input_df before joining
+    final_frame = pd.merge(left=user_input_df, right=allocation_frame, how="left", on='ClusterName')
+    return final_frame
 
 
 def balance_calculator(target, territory_data_frame):
-    # Group by "Territory"
-    # Calculate Sum Square Errors of Territory Index - Target
-    # Return SSE
-    return 0.0
+    balance_grouped = territory_data_frame.groupby('Territory').agg({'Index': 'sum'}).reset_index()
+    balance_grouped['Target'] = target
+    balance_grouped['SquaredError'] = (balance_grouped['Target'] - balance_grouped['Index']) ** 2
+    return balance_grouped['SquaredError'].sum()
+
+
+def get_neighbors(territory_data_frame):
+    neighbor_df = gpd.GeoDataFrame(territory_data_frame, geometry=gpd.points_from_xy(territory_data_frame.Longitude,
+                                                                                     territory_data_frame.Latitude))
+    # Select Random Territory
+    territory_select = random.randint(0, neighbor_df['Territory'].max())
+    # This is probably a terrible way to do this
+    # BUT - creating two data frames, one that is going to receive a new cluster, one that will give
+    receiving_df = neighbor_df.loc[neighbor_df['Territory'] == territory_select]
+    giving_df = neighbor_df.loc[neighbor_df['Territory'] != territory_select]
+    distance_output = (ckdnearest(receiving_df, giving_df))
+    swap_to_make = distance_output.loc[distance_output['dist'].idxmin()]
+    return swap_to_make[4], swap_to_make[6]
+
+
+def swap_neighbors(territory_data_frame, new_territory_num):
+    if debug: print(f"Swapping Cluster {new_territory_num[1]} to Territory {new_territory_num[0]}")
+    territory_data_frame.loc[(territory_data_frame['ClusterName'] == new_territory_num[1]), 'Territory'] = new_territory_num[0]
+    return territory_data_frame
+
+
+def ckdnearest(gdfA, gdfB, gdfB_cols=['ClusterName']):
+    # resetting the index of gdfA and gdfB here.
+    gdfA = gdfA.reset_index(drop=True)
+    gdfB = gdfB.reset_index(drop=True)
+    A = np.concatenate(
+        [np.array(geom.coords) for geom in gdfA.geometry.to_list()])
+    B = [np.array(geom.coords) for geom in gdfB.geometry.to_list()]
+    B_ix = tuple(itertools.chain.from_iterable(
+        [itertools.repeat(i, x) for i, x in enumerate(list(map(len, B)))]))
+    B = np.concatenate(B)
+    ckd_tree = cKDTree(B)
+    dist, idx = ckd_tree.query(A, k=1)
+    idx = itemgetter(*idx)(B_ix)
+    gdf = pd.concat(
+        [gdfA, gdfB.loc[idx, gdfB_cols].reset_index(drop=True),
+         pd.Series(dist, name='dist')], axis=1)
+    return gdf
 
 
 if __name__ == "__main__":
     input_file = "./test/example_input_cluster.csv"
-    output_file = "./test/example_outputs.xlsx"
     input_data_frame = ce.cluster_input(input_file)
-    input_df = ce.cluster_generator(input_data_frame, cluster_factor=12, debug=False)
-    cluster_allocator(user_input_df=input_df)
+    input_df = ce.cluster_generator(input_data_frame, cluster_factor=15, debug=False)
+    cluster_allocator(user_input_df=input_df).to_csv("./test_output_data.csv")

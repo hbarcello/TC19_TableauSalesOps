@@ -26,6 +26,7 @@ while True:
         pop_up_string = newdf.dtypes
         sg.popup(pop_up_string)
         # Should work but doesn't clustering.cluster_generator(values[0])
+
     if event == 'Ok' and len(values[0]) > 0:
         progress_bar = window.FindElement('progbar')
         progress_text = window.FindElement('cpg')

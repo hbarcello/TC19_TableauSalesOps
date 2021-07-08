@@ -3,20 +3,21 @@
 # Enrichment for 2020 - based on R Script, format of output slightly different
 # For 2019 Tableau Conference "Optimizing Sales Territories with Tableau"
 # This is not TabPy compatible at this time, functionality to come in later versions.
+
 import pandas as pd
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 
 def cluster_generator(input_tab_df, cluster_factor=12, cluster_field='State', target_territories=8,
-                      debug=False, row_unit='Postal', balance_unit='Index', cluster_round=0):
-    target_mean = (input_tab_df['Index'].sum() / target_territories)
-    if debug:
-        print("Target Territory Index is ", "{:.2f}".format(target_mean))
-        print(type(target_mean))
-        print(input_tab_df.info())
-    df_to_cluster = input_tab_df[input_tab_df['Index'] <= (target_mean * 0.65)]
-    df_to_pass_through = input_tab_df[input_tab_df['Index'] > (target_mean * 0.65)]
-    df_to_pass_through['ClusterName'] = df_to_pass_through[row_unit]
+                      debug=False, row_unit='Postal', balance_unit='Index', sub_cluster='None', cluster_round=0):
+    #df_to_cluster = input_tab_df[input_tab_df['Index'] <= (target_mean * 0.65)]
+    #df_to_pass_through = input_tab_df[input_tab_df['Index'] > (target_mean * 0.65)]
+    #df_to_pass_through['ClusterName'] = df_to_pass_through[row_unit]
+    # At this stage, for experiment purposes, don't filter out any rows, leave those until the state clustering portion
+    df_to_cluster = input_tab_df
+
     if debug:
         print("Initial Cluster Filtering Completed...")
         print(df_to_cluster.head())
@@ -26,8 +27,18 @@ def cluster_generator(input_tab_df, cluster_factor=12, cluster_field='State', ta
     for state in df_unique_states:
         if debug: print("Now Clustering", state)
         current_subset = df_to_cluster[df_to_cluster[cluster_field] == state].copy()
+        target_territories = current_subset['Territories']
+        cluster_factor = current_subset['Clusters']
+        # Grab Territories and Clusters from fields in data frame copy
+
         # Ensure at least 2 clusters per state, more if applicable, but no more than total postal codes
         numeric_cluster_maximum = current_subset[row_unit].count() - 1
+        target_mean = (current_subset['Index'].sum() / target_territories)
+        if debug:
+            print("Target Territory Index is ", "{:.2f}".format(target_mean))
+            print(type(target_mean))
+            print(current_subset.info())
+
         numeric_cluster_recommendation = min(int(current_subset.Index.sum() / target_mean) * cluster_factor,
                                              numeric_cluster_maximum)
         estimated_number_clusters = max(numeric_cluster_recommendation, 2)
@@ -36,17 +47,20 @@ def cluster_generator(input_tab_df, cluster_factor=12, cluster_field='State', ta
         if current_subset[row_unit].count() > 1:
             kmeans = KMeans(n_clusters=estimated_number_clusters)
             state_clusters = kmeans.fit_predict(current_subset[['Latitude', 'Longitude']])
-            if debug: print(state_clusters)
-            current_subset['ClusterName'] = [state + "." + str(cluster_round) + "." + str(c + 1) for c in state_clusters]
+            if debug: print(state_clusters)['ClusterName'] = [state + "." + str(cluster_round) + "." + str(c + 1) for c in
+                                             state_clusters]
+            current_subset
         else:
             current_subset['ClusterName'] = state + "." + str(cluster_round) + "." + current_subset[row_unit]
         clusters_to_breakup = current_subset.groupby('ClusterName').sum()
         clusters_to_breakup = clusters_to_breakup[clusters_to_breakup['Index'] >= target_mean]
         if len(clusters_to_breakup) > 0:
             if debug: print(clusters_to_breakup.index.tolist())
-            temporary_cluster_subset = current_subset[current_subset.ClusterName.isin(clusters_to_breakup.index.tolist())]
+            temporary_cluster_subset = current_subset[
+                current_subset.ClusterName.isin(clusters_to_breakup.index.tolist())]
             # Delete Rows From Temporary Cluster Subset
-            current_subset = current_subset.drop(current_subset[current_subset.ClusterName.isin(clusters_to_breakup.index.tolist())].index)
+            current_subset = current_subset.drop(
+                current_subset[current_subset.ClusterName.isin(clusters_to_breakup.index.tolist())].index)
             output_clusters_second_rnd = cluster_generator(temporary_cluster_subset, cluster_factor=cluster_factor,
                                                            cluster_field=cluster_field,
                                                            target_territories=target_territories, row_unit=row_unit,

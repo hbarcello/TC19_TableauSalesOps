@@ -33,11 +33,13 @@ def cluster_generator(input_tab_df, cluster_factor=12, cluster_field='State', ta
 
         # Ensure at least 2 clusters per state, more if applicable, but no more than total postal codes
         numeric_cluster_maximum = current_subset[row_unit].count() - 1
-        target_mean = (current_subset['Index'].sum() / target_territories)
+        target_mean = (current_subset['Index'].sum() / min(target_territories))
         if debug:
             print("Target Territory Index is ", "{:.2f}".format(target_mean))
             print(type(target_mean))
             print(current_subset.info())
+
+        current_subset_int = current_subset.Index.sum()
 
         numeric_cluster_recommendation = min(int(current_subset.Index.sum() / target_mean) * cluster_factor,
                                              numeric_cluster_maximum)
@@ -90,7 +92,7 @@ def cluster_input(input_file_loc):
 
 
 if __name__ == "__main__":
-    input_file = "./test/example_input_cluster_2.csv"
+    input_file = "./test/example_input_cluster.csv"
     output_file = "./test/example_outputs.xlsx"
     input_data_frame = cluster_input(input_file)
     cluster_writer(cluster_generator(input_data_frame, cluster_factor=12, debug=True), output_file)

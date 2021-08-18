@@ -16,7 +16,7 @@ def cluster_generator(input_tab_df, cluster_factor=12, cluster_field='State', ta
 
     df_to_cluster = input_tab_df[input_tab_df['Territories'] > 1].copy()
     df_to_pass_through = input_tab_df[input_tab_df['Territories'] <= 1].copy()
-    df_to_pass_through['ClusterName'] = df_to_pass_through['Postal']
+    df_to_pass_through['ClusterName'] = df_to_pass_through['State']
 
     if debug:
         print("Initial Cluster Filtering Completed...")

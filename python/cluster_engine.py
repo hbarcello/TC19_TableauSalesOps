@@ -38,24 +38,26 @@ def cluster_generator(input_tab_df, cluster_factor=12, debug=False, round=0):
             kmeans = KMeans(n_clusters=estimated_number_clusters)
             state_clusters = kmeans.fit_predict(current_subset[['Latitude', 'Longitude']])
             if debug: print(state_clusters)
-            current_subset['ClusterName'] = [state + "." + str(round) + "." + str(c+1) for c in state_clusters]
+            current_subset['ClusterName'] = [state + "." + str(round) + "." + str(c + 1) for c in state_clusters]
         else:
             current_subset['ClusterName'] = state + "." + str(round) + "." + current_subset['Postal']
         clusters_to_breakup = current_subset.groupby('ClusterName').sum()
         clusters_to_breakup = clusters_to_breakup[clusters_to_breakup['Index'] >= target_mean]
         if len(clusters_to_breakup) > 0:
             if debug: print(clusters_to_breakup.index.tolist())
-            temporary_cluster_subset = current_subset[current_subset.ClusterName.isin(clusters_to_breakup.index.tolist())]
+            temporary_cluster_subset = current_subset[
+                current_subset.ClusterName.isin(clusters_to_breakup.index.tolist())]
             # Delete Rows From Temporary Cluster Subset
-            current_subset = current_subset.drop(current_subset[current_subset.ClusterName.isin(clusters_to_breakup.index.tolist())].index)
-            output_clusters_second_rnd = cluster_generator(temporary_cluster_subset, round=round+1, debug=True)
+            current_subset = current_subset.drop(
+                current_subset[current_subset.ClusterName.isin(clusters_to_breakup.index.tolist())].index)
+            output_clusters_second_rnd = cluster_generator(temporary_cluster_subset, round=round + 1, debug=True)
             current_subset = pd.concat([current_subset, output_clusters_second_rnd])
 
         df_fn_output = pd.concat([current_subset, df_fn_output])
     if debug:
         print("----Example Data Output----")
         print(df_fn_output.head())
-    # Take postals that were too large, calculate their postal as their cluster
+    # Take postal codes that were too large, calculate their postal as their cluster
     # then union back into clustered data
     df_fn_output = pd.concat([df_fn_output, df_to_pass_through])
     return df_fn_output

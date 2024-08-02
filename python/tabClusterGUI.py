@@ -1,6 +1,18 @@
+############################
+# By Hunter Barcello       #
+# Last Update : 8-2-2024   #
+# hbarcello@gmail.com      #
+#######################################################################
+# Note : PySimpleGUI needs some additional work to run on Mac Silicon #
+# For the moment, only command line interface is supported on the ARM #
+# (M1, M2, etc)                                                       #
+#######################################################################
+
 import cluster_engine
 import PySimpleGUI as sg
 import pandas as pd
+
+
 
 sg.theme('DarkAmber')	# Add a touch of color
 # All the stuff inside your window.

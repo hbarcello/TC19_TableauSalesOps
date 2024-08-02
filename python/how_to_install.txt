@@ -1,7 +1,7 @@
 Installation instructions for using the python desktop clustering tool
 
 Step 1)
-Download and install python 3.7 if you do not already have it on your PC or Mac.
+Download and install python 3.11 if you do not already have it on your PC or Mac.
 
 Step 2)
 Download this git project and unzip to a directory of your choice
@@ -15,7 +15,7 @@ pip install -r requirements.txt
 
 This will install all the required python packages for use with this program.
 
-Step 5)
+Step 5a) [This is currently windows only, working through requirements for Mac Silicon as of August 2024]
 from the command line (or terminal) type
 
 python3 tabClusterGUI.py
@@ -23,3 +23,12 @@ python3 tabClusterGUI.py
 a GUI interface should appear where you can navigate to a .csv file to execute clustering on.  The example template of what an input file should look like is located at
 python/test/example_input_cluster.csv 
 
+Step 5b) [All Platforms]
+In the command line terminal, within the python folder, you can execute a command line clustering with the following syntax
+
+python3 tabClusterCMD.py --ClusterInputFile <File Location - No Quotes> --outputLocation <File output path and name, no quotes, .xlsx extension>
+
+########################################################################################################################
+#Using the test data this would look like
+#python3 tabClusterCMD.py --ClusterInputFile test/example_input_cluster.csv --outputLocation test/output_file_test.xlsx
+########################################################################################################################

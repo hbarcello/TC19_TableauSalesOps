@@ -1,5 +1,6 @@
 # TC19 Optimal Territory Planning with Tableau #TableauSalesOps
-8/2/2024 Update : After some time away from this project, I'm picking it up again, some of the dependencies need updating for more current versions of Python. Feel free to reach out if you'd like to help.
+8/2/2024 Update : With the increasing prevalance of Apple M1 + M2 chips at work, I've updated the libraries to those which are ARM compatible and increased documentation for the Command Line version.
+Tkinter and the ARM chipset are requiring some additional work for the GUI to be functional, at the moment M1+ devices will need to use the command line.
 
 6/10/2020 Update : I've posted a new folder "python" where a python implementation of the territory clustering tool has been released. 
                    There is a file for those would be prefer a GUI, and one that presents a command line version as well. Documentaiton is                    light at the moment, but I hope to provide some with time. Feel free to reach out to me (contact info in files) if you                    have questions or feedback.  TabPy support is also in the planning, but may be a ways out, given other commitments.

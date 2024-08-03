@@ -23,7 +23,7 @@ layout = [  [sg.Text('Tableau Clustering Tool')], [sg.In("Browse For Input File 
             [sg.Button('Ok'), sg.Button('Validate'), sg.Button('Exit')],
             [sg.ProgressBar(200, orientation='h', size=(20, 20), key='progbar'),
              sg.Text("Clustering Progress", key='cpg')],
-            [sg.Text("Created by Hunter Barcello : hbarcello@tableau.com", font='Helvetica, 7')]
+            [sg.Text("Created by Hunter Barcello : hbarcello@gmail.com", font='Helvetica, 7')]
             ]
 
 # Create the Window

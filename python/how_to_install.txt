@@ -15,13 +15,25 @@ pip install -r requirements.txt
 
 This will install all the required python packages for use with this program.
 
-Step 5a) [This is currently windows only, working through requirements for Mac Silicon as of August 2024]
+Step 5a)
+NOTE : The GUI version may require extra work to run on Apple hardware (see below)
+The GUI typically works well out of the box with windows
+
 from the command line (or terminal) type
 
 python3 tabClusterGUI.py
 
-a GUI interface should appear where you can navigate to a .csv file to execute clustering on.  The example template of what an input file should look like is located at
+a GUI interface should appear where you can navigate to a .csv file to execute clustering on.
+The example template of what an input file should look like is located at
 python/test/example_input_cluster.csv 
+
+Mac Only : Depending on your local configuration, you may need to perform extra steps to ensure your python environment
+is using the correct version of Tkinter. If you are using the outdated, built in system verion of Tkinter you will see
+errors. I would recommend using PyEnv to install the latest version of Tkinter and ensure it is appropriately referenced
+in a virtual environment.
+
+env PYTHON_CONFIGURE_OPTS="--with-tcltk-includes='-I/usr/local/opt/tcl-tk/include' --with-tcltk-libs='-L/usr/local/opt/tcl-tk/lib -ltcl8.6 -ltk8.6'" pyenv install 3.11.9
+
 
 Step 5b) [All Platforms]
 In the command line terminal, within the python folder, you can execute a command line clustering with the following syntax

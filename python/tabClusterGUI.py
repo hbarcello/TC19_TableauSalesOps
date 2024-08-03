@@ -9,7 +9,7 @@
 #######################################################################
 
 import cluster_engine
-import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 import pandas as pd
 
 

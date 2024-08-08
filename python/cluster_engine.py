@@ -52,8 +52,11 @@ def cluster_generator(input_tab_df, cluster_factor=12, debug=False, round=0):
                 current_subset[current_subset.ClusterName.isin(clusters_to_breakup.index.tolist())].index)
             output_clusters_second_rnd = cluster_generator(temporary_cluster_subset, round=round + 1, debug=True)
             current_subset = pd.concat([current_subset, output_clusters_second_rnd])
+        if not df_fn_output.empty:
+            df_fn_output = pd.concat([current_subset, df_fn_output])
+        else:
+            df_fn_output = current_subset
 
-        df_fn_output = pd.concat([current_subset, df_fn_output])
     if debug:
         print("----Example Data Output----")
         print(df_fn_output.head())

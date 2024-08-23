@@ -1,4 +1,9 @@
 # TC19 Optimal Territory Planning with Tableau #TableauSalesOps
+
+8/22/2024 Update : I've heard feedback through the years from users who have a very locked down environment on their work machines and have struggled with downloading all the necessary software to run the territory clustering tool. In response to those issues, I've launched a simple, free webapp for general use. You can find it at this URL https://streamlit-cluster-5wfo3fqbaq-uw.a.run.app/
+
+Please send me any feedback you have!
+
 8/3/2024 Update : With the increasing prevalance of Apple M1 + M2 chips at work, I've updated the libraries to those which are ARM compatible and increased documentation for the Command Line version. If you are experiencing issues with the GUI on Mac, check the .txt file for instructions on how to resolve references to old Tkinter installs. 
 
 6/10/2020 Update : I've posted a new folder "python" where a python implementation of the territory clustering tool has been released. 

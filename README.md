@@ -1,5 +1,8 @@
 # TC19 Optimal Territory Planning with Tableau #TableauSalesOps
 
+9/13/2134 Update : Check out the tutorial video on YouTube, this one goes more in depth on the build of territories and more. It also demos the WebApp 
+https://youtu.be/mk9zZXMWKMY?si=BcKI8D7EtbEs09_O
+
 8/22/2024 Update : I've heard feedback through the years from users who have a very locked down environment on their work machines and have struggled with downloading all the necessary software to run the territory clustering tool. In response to those issues, I've launched a simple, free webapp for general use. You can find it at this URL https://streamlit-cluster-5wfo3fqbaq-uw.a.run.app/
 
 Please send me any feedback you have!
